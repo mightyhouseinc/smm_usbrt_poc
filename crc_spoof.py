@@ -36,36 +36,36 @@ def modify_buffer_crc32(buffer, offset, newcrc, printstatus=False):
 	crc = get_buffer_crc32(buffer)
 	if printstatus:
 		print("Buffer CRC-32: {:08X}".format(reverse32(crc)))
-		
+
 	# Compute the change to make
 	delta = crc ^ newcrc
 	delta = multiply_mod(reciprocal_mod(pow_mod(2, (length - offset) * 8)), delta)
-	
+
 	# Patch 4 bytes in the buffer
 	bytes4 = bytearray(buffer[offset:offset+4])
 	if len(bytes4) != 4:
 		raise IOError("Cannot read 4 bytes at offset")
-		
+
 	if printstatus:
 		print("Target bytes @ offset: {:s}".format(str(bytes4).encode('hex')))
 
 	for i in range(4):
 		bytes4[i] ^= (reverse32(delta) >> (i * 8)) & 0xFF
-    
+
 	if printstatus:
 		print("Patched value: {:s}".format(str(bytes4).encode('hex')))
 
-	result = str(buffer[0:offset] + bytes4 + buffer[offset+4:])
-	
+	result = str(buffer[:offset] + bytes4 + buffer[offset+4:])
+
 	if printstatus:
 		print("Computed and wrote patch")
-	
+
 	# Recheck entire file
 	if get_buffer_crc32(result) != newcrc:
 		raise AssertionError("Failed to update CRC-32 to desired value")
 	elif printstatus:
 		print("New CRC-32 successfully verified")
-	
+
 	return result
 
 # Public library function. path is str/unicode, offset is uint, newcrc is uint32, printstatus is bool.
@@ -126,7 +126,7 @@ def get_file_crc32(raf):
 
 def reverse32(x):
 	y = 0
-	for i in range(32):
+	for _ in range(32):
 		y = (y << 1) | (x & 1)
 		x >>= 1
 	return y
